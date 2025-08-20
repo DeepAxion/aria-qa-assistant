@@ -1,0 +1,26 @@
+# ARIA Requirements 
+
+# Core OCR dependencies (Phase 1)
+paddlepaddle==2.5.2
+paddleocr==2.7.3
+Pillow==10.1.0
+opencv-python==4.8.1.78
+numpy==1.24.3
+
+# PDF processing
+pypdf==3.17.4
+pdf2image==1.16.3
+
+# System utilities
+python-dotenv==1.0.0
+pathlib2
+
+
+# RAG dependencies (Phase 2)
+faiss-cpu==1.7.4 # Or faiss-gpu if a GPU is available
+sentence-transformers==2.2.2
+langchain==0.2.7
+langchain-community==0.2.7
+langchain_openai==0.3.30
+
+
