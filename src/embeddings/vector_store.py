@@ -47,7 +47,6 @@ class ARIAVectorStore:
     Manages the Pinecone vector store for ARIA RAG system.
     """
     def __init__(self):
-        
         logger.info("🅰️ Initializing ARIA Vector Store...")
         
         # initialize embedding model
