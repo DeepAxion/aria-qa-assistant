@@ -14,7 +14,8 @@ sys.path.insert(0, 'src')
 from langchain_core.documents import Document
 
 # Assuming vector_store.py is in the same directory
-from embeddings.vector_store import ARIAVectorStore, VECTOR_STORE_PATH
+from embeddings.vector_store import ARIAVectorStore, VECTOR_STORE_PATH, INDEX_NAME
+# TEST_NAMESPACE = "test-user-01"
 
 # Configure logging to show all messages
 logging.basicConfig(
@@ -23,6 +24,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+    
+def setup_pinecone_test_env():
+    """Sets up a clean test environment by removing any existing vector store."""
+    logger.info("🏗️ Setting up test environment...")
+    store = ARIAVectorStore()
+    store.pinecone_client.delete_index(INDEX_NAME)
+    
+    logger.info("✅ Test environment ready.")
+    
 def setup_test_env():
     """Sets up a clean test environment by removing any existing vector store."""
     logger.info("🏗️ Setting up test environment...")
@@ -35,7 +45,7 @@ def setup_test_env():
             logger.error(f"Error removing directory: {e}")
             raise
     logger.info("✅ Test environment ready.")
-
+    
 def create_sample_documents() -> List[Document]:
     """Generates a list of sample LangChain Document objects for testing."""
     logger.info("Creating sample documents...")
@@ -71,7 +81,33 @@ def test_add_documents(store: ARIAVectorStore, docs: List[Document]):
     assert final_count == initial_count + len(docs), f"Expected {initial_count + len(docs)}, got {final_count} instead"
     
     # verify the index file was created
-    assert os.path.exists(os.path.join(VECTOR_STORE_PATH, "index.faiss"))
+    # assert os.path.exists(os.path.join(VECTOR_STORE_PATH, "index.faiss"))
+    logger.info("✅ Documents added successfully and index file created.")
+    
+def test_add_documents_pinecone(store: ARIAVectorStore, docs: List[Document]):
+    """Test adding documents to the vector store."""
+    logger.info("📄 Testing document addition...")
+    
+    # get the count of before and after adding documents
+    index = store.pinecone_client.Index(INDEX_NAME)
+    initial_stats = index.describe_index_stats()
+    initial_count = initial_stats["namespaces"].get("", {}).get("vector_count", 0)
+    logger.info(f"Initial stat: {initial_count}")
+    # add the document
+    store.add_documents(docs)
+    
+    # give Pinecone time to register the inserts as it will not update instantly
+    import time
+    time.sleep(5)
+    
+    final_stats = index.describe_index_stats()
+    final_count = final_stats["namespaces"].get("", {}).get("vector_count", 0)
+    logger.info(f"Final stat: {final_count}")
+    # compare
+    assert final_count == initial_count + len(docs), f"Expected {initial_count + len(docs)}, got {final_count} instead"
+    
+    # verify the index file was created
+    # assert os.path.exists(os.path.join(VECTOR_STORE_PATH, "index.faiss"))
     logger.info("✅ Documents added successfully and index file created.")
     
 def test_similarity_search(store: ARIAVectorStore):
@@ -89,7 +125,7 @@ def test_similarity_search(store: ARIAVectorStore):
 if __name__ == "__main__":
     try:
         # Step 1: Set up a clean test environment
-        setup_test_env()
+        setup_pinecone_test_env()
         
         # Step 2: Create sample data
         sample_documents = create_sample_documents()
@@ -98,7 +134,7 @@ if __name__ == "__main__":
         vector_store_instance = test_vector_store_initialization()
         
         # Step 4: Test adding documents
-        test_add_documents(vector_store_instance, sample_documents)
+        test_add_documents_pinecone(vector_store_instance, sample_documents)
         
         # Step 5: Test similarity search
         test_similarity_search(vector_store_instance)

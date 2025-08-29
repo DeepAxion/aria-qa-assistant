@@ -35,7 +35,7 @@ logging.basicConfig(
         logging.FileHandler("data/logs/ocr.log", mode="w", encoding="utf-8"),  # overwrite each run
         logging.StreamHandler()  # also print to console
     ],
-    # force=True  # ensures config applies even if logging was set before
+    force=True  # ensures config applies even if logging was set before
 )
 
 logger = logging.getLogger(__name__)
@@ -438,7 +438,7 @@ class ARIAOCRProcessor:
 
         # remove common OCR artifacts and unwanted characters
         # example: removes non-alphanumeric except for punctuation and spaces
-        text = re.sub(r'[^a-z0-9\s$%+.,?!;:\-()\'\"]', '', text)
+        text = re.sub(r'[^a-z0-9\s@$%+.,?!;:\-()\'\"]', '', text)
         
         # replace multiple spaces with a single space
         text = re.sub(r'\s+', ' ', text).strip()

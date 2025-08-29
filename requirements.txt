@@ -22,5 +22,15 @@ sentence-transformers==2.2.2
 langchain==0.2.7
 langchain-community==0.2.7
 langchain_openai==0.3.30
+pinecone-client
+langchain-pinecone
+
+# FastAPI dependencies (Phase 3)
+fastapi # the web framework itself
+uvicorn # asgi server that runs the application 
+python-multipart # handling file uploads
+pydantic==2.10.6
+streamlit
+
 
 

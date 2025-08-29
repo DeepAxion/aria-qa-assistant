@@ -6,3 +6,4 @@ LLMs have their limited context window (e.g: gpt-4.0-nano has a context window o
 
 
 
+pinecone_api = pcsk_5K2YUe_Hwnuba6ADjAYf9ydEsGsFkJ2YiSRGpt98VQuMkypCa78jr5ckf6JGJNZ9MqZvsi

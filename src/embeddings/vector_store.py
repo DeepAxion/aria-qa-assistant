@@ -2,6 +2,7 @@
 ARIA Vector Store Manager 
 Handles all vector store operations with FAISS and sentence-transformers
 """
+import os
 import logging
 import faiss
 from typing import List
@@ -12,6 +13,10 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
+from pinecone import Pinecone, ServerlessSpec
+from langchain_pinecone import PineconeVectorStore
+from dotenv import load_dotenv
+
 
 # Configure logging
 logging.basicConfig(
@@ -23,8 +28,13 @@ logger = logging.getLogger(__name__)
 # --- Configuration ---
 # Choose a local embedding model that is free and has a permissive license.
 # 'all-MiniLM-L6-v2' is a good, small, and fast choice for a start. 
+# load environment variables from .env file
+load_dotenv()
+
 EMBEDDING_MODEL_NAME = "text-embedding-3-small"
 VECTOR_STORE_PATH = "data/faiss_index"
+INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME")
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
 
 class ARIAVectorStore:
     """
@@ -32,14 +42,31 @@ class ARIAVectorStore:
     """
     def __init__(self):
         
-        logger.info("Initializing ARIA Vector Store...")
+        logger.info("🅰️ Initializing ARIA Vector Store...")
         
         # initialize embedding model
         self.embeddings = self._get_embedding_model()
         
+        # initialize pinecone client
+        try:
+            self.pinecone_client = Pinecone(api_key=PINECONE_API_KEY)
+            
+            # check if index exists
+            if INDEX_NAME in self.pinecone_client.list_indexes().names():
+                logger.info(f"✅ Pinecone index '{INDEX_NAME}' already exists. Skipping creation.")
+            else: 
+                self._create_pinecone_index()
+                    
+            logger.info("✅ Pinecone connection successful")
+        except Exception as e:
+            logger.error(f"😟 Failed to connect to Pinecone: {e}")
+        
         # load or create the FAISS Index
-        self.vector_store = self._load_or_create_vector_store()
- 
+        # self.vector_store = self._load_or_create_vector_store()
+        self.vector_store = PineconeVectorStore.from_existing_index(
+            index_name=INDEX_NAME, embedding=self.embeddings, namespace=""
+        )
+        
         logger.info("✅ Vector Store initialized successfully! ")
 
     def _get_embedding_model(self):
@@ -70,6 +97,17 @@ class ARIAVectorStore:
         #     logger.error(f"Failed to load Embedding Model: {e}")
         #     raise
 
+    def _create_pinecone_index(self):
+        """Creates a Pinecone index if it doesn't exist."""
+        logger.info(f"🆕 Creating new Pinecone index: {INDEX_NAME}")
+        self.pinecone_client.create_index(
+            name=INDEX_NAME,
+            dimension=len(self.embeddings.embed_query("hello world")),
+            metric='cosine',
+            spec=ServerlessSpec(cloud='aws', region='us-east-1')
+        )
+        logger.info("✅ Index created successfully")
+        
     def _load_or_create_vector_store(self):
         """Loads the FAISS index from disk or creates a new one."""
         
@@ -113,19 +151,20 @@ class ARIAVectorStore:
             if not isinstance(documents, list):
                 documents = [documents]
 
-            # add document to store
+            # add document to store, passing the unique user's namespace from user ID
             self.vector_store.add_documents(documents)
             # save the added document to vector store
-            self.vector_store.save_local(VECTOR_STORE_PATH)
-            logger.info(f"Added {len(documents)} documents to FAISS vector store and saved to disk.")
+            # self.vector_store.save_local(VECTOR_STORE_PATH)
+            # logger.info(f"Added {len(documents)} documents to FAISS vector store and saved to disk.")
+            logger.info(f"Added {len(documents)} documents to Pinecone index.")
 
         except Exception as e:
-            logger.error(f"Failed to add documents to vector store: {e}")
+            logger.error(f"Failed to add documents to Pinecone: {e}")
             raise
         
-    def similarity_search(self, query: str, k: int = 4) -> List[Document]:
+    def similarity_search(self, query: str, k: int = 4, ) -> List[Document]:
         """Performs a similarity search on the vector store."""
-        logger.info(f"🔍 Searching for {query}...")
+        logger.info(f"🔍 Searching for {query} ... ")
         
         # search logic is handled by the FAISS index and the embedding model
         found_docs = self.vector_store.similarity_search(query, k)
@@ -148,6 +187,16 @@ class ARIAVectorStore:
             logger.warning("Vector store directory not found, nothing to clear.")
         except Exception as e:
             logger.error(f"Failed to clear vector store: {e}")
+            raise
+        
+    def clean_pinecone_store(self):
+        """Deletes all vectors from the Pinecone index."""
+        try:
+            index = self.pinecone_client.Index(INDEX_NAME)
+            index.delete(delete_all=True)
+            logger.info("🗑️ Pinecone index cleared successfully.")
+        except Exception as e:
+            logger.error(f"Failed to clear Pinecone index: {e}")
             raise
         
     

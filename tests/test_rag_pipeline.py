@@ -10,9 +10,9 @@ import logging
 # add src to Python path
 sys.path.insert(0, 'src')
 
-# Assuming vector_store.py is in the same directory
-from embeddings.vector_store import VECTOR_STORE_PATH
-from retrieval.rag_pipeline import ARIARAGPipeline
+# import modules
+from src.embeddings.vector_store import VECTOR_STORE_PATH, INDEX_NAME, ARIAVectorStore
+from src.retrieval.rag_pipeline import ARIARAGPipeline
 
 # Configure logging to show all messages
 logging.basicConfig(
@@ -34,9 +34,16 @@ def setup_test_env():
             logger.error(f"Error removing directory: {e}")
             raise
     logger.info("✅ Test environment ready.")
+    
+def setup_pinecone_test_env():
+    """Sets up a clean test environment by removing any existing vector store."""
+    logger.info("🏗️ Setting up test environment...")
+    store = ARIAVectorStore()
+    store.pinecone_client.delete_index(INDEX_NAME)
+    
+    logger.info("✅ Test environment ready.")
 
 def test_rag_pipeline():
-    
     logger.info("🚀 Initializing ARIA RAG Pipeline...")
     pipeline = ARIARAGPipeline()
     try:
@@ -44,6 +51,7 @@ def test_rag_pipeline():
         document_to_ingest = "docs/test_resume.pdf"
         if os.path.exists(document_to_ingest):
             pipeline.ingest_document(document_to_ingest)
+            print()
         else:
             logger.error(f"File not found: {document_to_ingest}. Please place it in the same directory.")
 
@@ -52,14 +60,15 @@ def test_rag_pipeline():
         #2. Ask questions
         if os.path.exists(document_to_ingest):
             questions = [
-                "Where did the candidate graduate from?",
+                "What university did the candidate graduate from?",
                 "What is the candidate's main tech stack?",
                 "How many years of experience does the candidate have?"
             ]
             
             for q in questions:
                 print(f"**Question**: {q}")
-                answer = pipeline.answer_query(q)
+                answer = pipeline.answer_query(q)   
+                
                 full_answer = ""
                 for chunk in answer:
                     full_answer += chunk
@@ -81,7 +90,7 @@ if __name__ == "__main__":
     print("=" * 60)
     
     # set up test environment
-    setup_test_env()
+    setup_pinecone_test_env()
     
     # run main test
     success = test_rag_pipeline()
