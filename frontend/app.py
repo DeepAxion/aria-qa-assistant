@@ -40,8 +40,8 @@ if uploaded_file is not None:
 # --- Query Section ---
 st.header("💭 Ask a Question")
 # a simple way to check if a document has been uploaded before enabling the text input
-# if 'is_document_processed' not in st.session_state:
-#     st.session_state.is_document_processed = False
+if 'is_document_processed' not in st.session_state:
+    st.session_state.is_document_processed = False
 
 question = st.text_input(
     "Enter your question here:",
