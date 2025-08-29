@@ -31,14 +31,20 @@ logger = logging.getLogger(__name__)
 # load environment variables from .env file
 load_dotenv()
 
+# we will use the small text embedding model from openai
 EMBEDDING_MODEL_NAME = "text-embedding-3-small"
-VECTOR_STORE_PATH = "data/faiss_index"
+# VECTOR_STORE_PATH = "data/faiss_index"
+
+# get pinecone index
 INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME")
+# get pinecone api key
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
+if not PINECONE_API_KEY:
+    raise ValueError("Pinecone API key not found. Please set the PINECONE_API_KEY environment variable.")
 
 class ARIAVectorStore:
     """
-    Manages the FAISS vector store for ARIA RAG system.
+    Manages the Pinecone vector store for ARIA RAG system.
     """
     def __init__(self):
         

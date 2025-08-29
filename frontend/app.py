@@ -12,6 +12,8 @@ st.title("🅰️ ARIA Document Q&A Assistant")
 # --- Document Upload Section ---
 st.header("📃 Upload a document")
 uploaded_file = st.file_uploader("Choose a PDF or image file", type=["pdf", "png", "jpg", "jpeg"])
+# initialize the state of the document
+st.session_state.is_document_processed = None
 
 if uploaded_file is not None:
     # add a button to manually start processing
@@ -40,8 +42,8 @@ if uploaded_file is not None:
 # --- Query Section ---
 st.header("💭 Ask a Question")
 # a simple way to check if a document has been uploaded before enabling the text input
-if 'is_document_processed' not in st.session_state:
-    st.session_state.is_document_processed = False
+# if 'is_document_processed' not in st.session_state:
+#     st.session_state.is_document_processed = False
 
 question = st.text_input(
     "Enter your question here:",
