@@ -7,8 +7,8 @@ import logging
 import faiss
 from typing import List
 from pathlib import Path
-from langchain_community.docstore.in_memory import InMemoryDocstore
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.docstore.in_memory import InMemoryDocstore
+# from langchain_community.embeddings import HuggingFaceEmbeddings
 # from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
