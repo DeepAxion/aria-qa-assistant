@@ -113,42 +113,42 @@ class ARIAVectorStore:
         )
         logger.info("✅ Index created successfully")
         
-    def _load_or_create_vector_store(self):
-        """Loads the FAISS index from disk or creates a new one."""
+    # def _load_or_create_vector_store(self):
+    #     """Loads the FAISS index from disk or creates a new one."""
         
-        # define the paths for the FAISS index and docstore files
-        index_path = Path(VECTOR_STORE_PATH) / "index.faiss"
-        docstore_path = Path(VECTOR_STORE_PATH) / "index.pkl"
+    #     # define the paths for the FAISS index and docstore files
+    #     index_path = Path(VECTOR_STORE_PATH) / "index.faiss"
+    #     docstore_path = Path(VECTOR_STORE_PATH) / "index.pkl"
         
-        # create the folders if not exists
-        Path(VECTOR_STORE_PATH).mkdir(parents=True, exist_ok=True)#create parent folder if it doesn't exist
+    #     # create the folders if not exists
+    #     Path(VECTOR_STORE_PATH).mkdir(parents=True, exist_ok=True)#create parent folder if it doesn't exist
         
-        try:
-            # check if both the index and docstore files exist
-            if index_path.exists() and docstore_path.exists():
-                logger.info(f"Loading existing FAISS index from {VECTOR_STORE_PATH}")
-                return FAISS.load_local(VECTOR_STORE_PATH, self.embeddings, allow_dangerous_deserialization=True)
-            else:
-                 # create a new empty FAISS index in memory
-                logger.warning("🆕 No existing FAISS index found. Creating a new empty index...")
-                # call embed_query on any text to get the dimension as faiss.IndexFlatL2 requires dim as an argument
-                dim = len(self.embeddings.embed_query("Hello world"))
-                # index to use, faiss needs to know the size of each vector to allocate memory and calculate the distance
-                index = faiss.IndexFlatL2(dim)
+    #     try:
+    #         # check if both the index and docstore files exist
+    #         if index_path.exists() and docstore_path.exists():
+    #             logger.info(f"Loading existing FAISS index from {VECTOR_STORE_PATH}")
+    #             return FAISS.load_local(VECTOR_STORE_PATH, self.embeddings, allow_dangerous_deserialization=True)
+    #         else:
+    #              # create a new empty FAISS index in memory
+    #             logger.warning("🆕 No existing FAISS index found. Creating a new empty index...")
+    #             # call embed_query on any text to get the dimension as faiss.IndexFlatL2 requires dim as an argument
+    #             dim = len(self.embeddings.embed_query("Hello world"))
+    #             # index to use, faiss needs to know the size of each vector to allocate memory and calculate the distance
+    #             index = faiss.IndexFlatL2(dim)
                 
-                # create vector store
-                vector_store = FAISS(
-                    embedding_function=self.embeddings, # embedding model
-                    index=index, 
-                    docstore=InMemoryDocstore(),
-                    index_to_docstore_id={}
-                )
+    #             # create vector store
+    #             vector_store = FAISS(
+    #                 embedding_function=self.embeddings, # embedding model
+    #                 index=index, 
+    #                 docstore=InMemoryDocstore(),
+    #                 index_to_docstore_id={}
+    #             )
                 
-                return vector_store
+    #             return vector_store
 
-        except Exception as e:
-            logger.error(f"Failed to load vector store: {e}")
-            raise
+    #     except Exception as e:
+    #         logger.error(f"Failed to load vector store: {e}")
+    #         raise
 
     def add_documents(self, documents: List[Document]):
         """Add a list of documents to vector store"""
@@ -181,18 +181,18 @@ class ARIAVectorStore:
             
         return found_docs
 
-    def clear_store(self):
-        """clear the vector store"""
-        try:
-            import shutil
-            shutil.rmtree(VECTOR_STORE_PATH)
-            self.vector_store = FAISS.from_documents(documents=[], embedding=self.embeddings)
-            logger.info("🗑️ Vector store cleared successfully.")
-        except FileNotFoundError:
-            logger.warning("Vector store directory not found, nothing to clear.")
-        except Exception as e:
-            logger.error(f"Failed to clear vector store: {e}")
-            raise
+    # def clear_store(self):
+    #     """clear the vector store"""
+    #     try:
+    #         import shutil
+    #         shutil.rmtree(VECTOR_STORE_PATH)
+    #         self.vector_store = FAISS.from_documents(documents=[], embedding=self.embeddings)
+    #         logger.info("🗑️ Vector store cleared successfully.")
+    #     except FileNotFoundError:
+    #         logger.warning("Vector store directory not found, nothing to clear.")
+    #     except Exception as e:
+    #         logger.error(f"Failed to clear vector store: {e}")
+    #         raise
         
     def clean_pinecone_store(self):
         """Deletes all vectors from the Pinecone index."""
