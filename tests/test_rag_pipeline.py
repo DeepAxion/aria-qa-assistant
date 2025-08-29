@@ -11,8 +11,8 @@ import logging
 sys.path.insert(0, 'src')
 
 # import modules
-from src.embeddings.vector_store import VECTOR_STORE_PATH, INDEX_NAME, ARIAVectorStore
-from src.retrieval.rag_pipeline import ARIARAGPipeline
+from embeddings.vector_store import VECTOR_STORE_PATH, INDEX_NAME, ARIAVectorStore
+from retrieval.rag_pipeline import ARIARAGPipeline
 
 # Configure logging to show all messages
 logging.basicConfig(
@@ -48,12 +48,13 @@ def test_rag_pipeline():
     pipeline = ARIARAGPipeline()
     try:
         # 1. Ingest a document
-        document_to_ingest = "docs/test_resume.pdf"
+        document_to_ingest = "docs/tuberculosis_receipt.png"
         if os.path.exists(document_to_ingest):
             pipeline.ingest_document(document_to_ingest)
             print()
         else:
             logger.error(f"File not found: {document_to_ingest}. Please place it in the same directory.")
+            return False
 
         print("-" * 50)
         

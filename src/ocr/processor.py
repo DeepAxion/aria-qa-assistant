@@ -160,7 +160,7 @@ class ARIAOCRProcessor:
                 text=text,
                 method="ocr_image",
                 file_path=image_path,
-                confidence=confidence,
+                confidence=float(confidence),
                 total_pages=1,
                 processing_time=processing_time
             )
