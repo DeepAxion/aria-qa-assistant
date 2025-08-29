@@ -32,6 +32,29 @@ The core technologies used in this project are:
 - **Containerization:** Docker
 
 
+## 🗺️ Project Structure
+```
+aria-qa-assistant/
+├── src/
+|   | 
+│   ├── ocr/             # OCR processing
+│   │   └── processor.py
+│   ├── embeddings/      # text chunking & embeddings
+│   │   └── vector_store.py
+│   │    
+│   ├── retrieval/       #  RAG Pipeline
+|   |   └──  rag_pipeline.py
+│   ├── api/             # FastAPI endpoints
+│   |   └── main.py
+│   | 
+|   ├── frontend/
+|   |    └── app.py
+├── docs/                # test documents
+├── docker/              # containerization assets
+├── tests/               # unit tests
+└── requirements.txt     # Python dependencies
+└── README.md
+```
 
 ## 🛠️ Setup and Installation
 Prerequisites
@@ -40,8 +63,43 @@ Prerequisites
 
 **Local Setup**
 
-1. Clone the repository:  
- 
+1. Clone the repository
+```
+git clone https://github.com/DeepAxion/aria-qa-assistant.git
+cd aria-qa-assistant
+```
+
+2. Set up the virtual environment
+```
+python -m venv venv
+venv/scripts/activate 
+```
+
+3. Install dependencies
+```
+pip install -r requirements.txt
+```
+
+4. Configure API Keys
+Create a .env file in the project root to store your OpenAI API key and Pinecone API key
+
+```
+OPENAI_API_KEY="your_api_key_here"
+PINECONE_API_KEY="your_api_key_here"
+```
+
+5. Run the application
+You can run the Streamlit frontend.
+```
+streamlit run src/frontend/app.py
+```
+
+
+
+### 🎦 Demo
+<p align="center">
+  <img src="images/demo.png">
+</p>
 
 
 [GPT-4.1]:https://img.shields.io/badge/Model-GPT--4.1-412991?logo=openai&logoColor=white
